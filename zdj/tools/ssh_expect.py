@@ -1,6 +1,6 @@
 # encoding: utf-8
 import pexpect
-PROMPT = ['# ', '>>> ', '> ', '\$ ']
+PROMPT = ['# ', '>>> ', '> ', '\$ ', pexpect.TIMEOUT]
 
 
 def connect(user, host, password):
@@ -18,8 +18,11 @@ def connect(user, host, password):
         if ret == 0:
             print('Error Connecting!')
     child.sendline(password)
-    print(child.before)
-
+    ret = child.expect(PROMPT)
+    if ret != 5:
+        child.sendline('cat /etc/passwd | grep root')
+        child.expect(PROMPT) 
+        print(child.before.decode('utf-8'))
 
 if __name__ == '__main__':
     connect('root', '192.168.100.20', 'hujnhu123')
