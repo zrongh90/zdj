@@ -1,5 +1,6 @@
 # encoding: utf-8
 import pexpect
+from pexpect import pxssh
 PROMPT = [pexpect.TIMEOUT, '# ', '>>> ', '> ', '\$ ']
 
 
@@ -31,10 +32,20 @@ def connect(user, host, password):
     child.sendline(password)
     return child
 
+def px_connection(user, host, password):
+    try:
+        s = pxssh.pxssh()
+        s.login(host, user, password)
+        return s
+    except:
+        print('Error Connecting!')
+        exit(0)
+
 
 if __name__ == '__main__':
     user = "root"
     host = "192.168.100.20"
     password = "hujnhu123"
-    child = connect('root', '192.168.100.20', 'hujnhu123')
+    # child = connect('root', '192.168.100.20', 'hujnhu123')
+    child = px_connection(user, host, password)
     run_cmd(child, 'cat /etc/passwd | grep -i root')
