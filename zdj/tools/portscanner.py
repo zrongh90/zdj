@@ -34,9 +34,16 @@ def nmap_scan(tgt_host, tgt_port):
     result = nmap_port_scan.scan(hosts=tgt_host, ports=tgt_port)
     # import pdb; pdb.set_trace()
     # print(result)
-    port_info = result['scan'][tgt_host]['tcp'][int(tgt_port)]
-    if port_info['state'] == 'open':
-        print('port:{0} '.format(tgt_port),port_info['state'], port_info['product'])
+    # port_info = result['scan'][tgt_host]['tcp'][int(tgt_port)]
+    scan_result = result['scan'][tgt_host]['tcp']
+    for one in scan_result.keys():
+        port_num = one
+        port_result = scan_result.get(one)
+        print('port {0}:'.format(port_num), port_result['state'], port_result['product'])
+        # print(scan_result.get(one))
+    # if port_info['state'] == 'open':
+    #     print('port:{0} '.format(tgt_port),port_info['state'], port_info['product'])
+
 
 def port_scan(tgt_host, tgt_ports):
     try:
@@ -49,12 +56,13 @@ def port_scan(tgt_host, tgt_ports):
         print('scan result for host:{0}'.format(tgt_name))
     except:
         print('scan result for host:{0}'.format(tgt_ip))
-    port_start, port_end = tgt_ports.split('-')
-    socket.setdefaulttimeout(2)
-    for port in range(int(port_start), int(port_end)):
-    # for port in port_list:
-        t = threading.Thread(target=nmap_scan,args=(tgt_host, str(port)))
-        t.start()
+    nmap_scan(tgt_host, tgt_ports)
+    # port_start, port_end = tgt_ports.split('-')
+    # socket.setdefaulttimeout(2)
+    # for port in range(int(port_start), int(port_end)):
+    # # for port in port_list:
+    #     t = threading.Thread(target=nmap_scan,args=(tgt_host, str(port)))
+    #     t.start()
         # conn_scan(tgt_host, port)
 
 
