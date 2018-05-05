@@ -13,6 +13,11 @@ def run_cmd(child, cmd):
         if ret != 0:
             print(child.before.decode('utf-8'))
 
+def px_run_cmd(px_client, cmd):
+    px_client.sendline(cmd)
+    px_client.prompt()
+    print(px_client.before.decode('utf-8'))
+
 
 def connect(user, host, password):
     ssh_new_keys = 'Are you sure you want to continue connecting'
@@ -48,4 +53,4 @@ if __name__ == '__main__':
     password = "hujnhu123"
     # child = connect('root', '192.168.100.20', 'hujnhu123')
     child = px_connection(user, host, password)
-    run_cmd(child, 'cat /etc/passwd | grep -i root')
+    px_run_cmd(child, 'cat /etc/passwd | grep -i root; uname -a')
