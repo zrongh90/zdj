@@ -32,8 +32,11 @@ def conn_scan(tgt_host, tgt_port):
 def nmap_scan(tgt_host, tgt_port):
     nmap_port_scan = nmap.PortScanner()
     result = nmap_port_scan.scan(hosts=tgt_host, ports=tgt_port)
-    print(result)
-
+    # import pdb; pdb.set_trace()
+    # print(result)
+    port_info = result['scan'][tgt_host]['tcp'][int(tgt_port)]
+    if port_info['state'] == 'open':
+        print('port:{0} '.format(tgt_port),port_info['state'], port_info['product'])
 
 def port_scan(tgt_host, tgt_ports):
     try:
