@@ -1,6 +1,16 @@
 # encoding: utf-8
 import pexpect
-PROMPT = ['# ', '>>> ', '> ', '\$ ', pexpect.TIMEOUT]
+PROMPT = [pexpect.TIMEOUT, '# ', '>>> ', '> ', '\$ ']
+
+
+def run_cmd(child, cmd):
+    # expect的字符串可以获取
+    ret = child.expect(PROMPT)
+    if ret != 0:
+        child.sendline(cmd)
+        child.expect(PROMPT)
+        if ret != 0:
+            print(child.before.decode('utf-8'))
 
 
 def connect(user, host, password):
@@ -17,12 +27,14 @@ def connect(user, host, password):
         ret = child.expect([pexpect.TIMEOUT, '[P|p]assword'])
         if ret == 0:
             print('Error Connecting!')
+            return
     child.sendline(password)
-    ret = child.expect(PROMPT)
-    if ret != 5:
-        child.sendline('cat /etc/passwd | grep root')
-        child.expect(PROMPT) 
-        print(child.before.decode('utf-8'))
+    return child
+
 
 if __name__ == '__main__':
-    connect('root', '192.168.100.20', 'hujnhu123')
+    user = "root"
+    host = "192.168.100.20"
+    password = "hujnhu123"
+    child = connect('root', '192.168.100.20', 'hujnhu123')
+    run_cmd(child, 'cat /etc/passwd | grep -i root')
