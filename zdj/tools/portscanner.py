@@ -56,7 +56,7 @@ def port_scan(tgt_host, tgt_ports):
         print('scan result for host:{0}'.format(tgt_name))
     except:
         print('scan result for host:{0}'.format(tgt_ip))
-    nmap_scan(tgt_host, tgt_ports)
+    nmap_scan(tgt_ip, tgt_ports)
     # port_start, port_end = tgt_ports.split('-')
     # socket.setdefaulttimeout(2)
     # for port in range(int(port_start), int(port_end)):
