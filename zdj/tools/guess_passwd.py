@@ -2,7 +2,9 @@
 import optparse
 from pexpect import pxssh
 
+global Found
 Found = False
+global target_pwd
 target_pwd = ""
 
 
