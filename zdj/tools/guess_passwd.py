@@ -2,10 +2,11 @@
 import optparse
 from pexpect import pxssh
 
+Found = False
+target_pwd = ""
+
 
 def connection(host, user, passwd):
-    global Found
-    global target_pwd
     try:
         s = pxssh.pxssh()
         s.login(host, user, passwd)
