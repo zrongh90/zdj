@@ -1,5 +1,6 @@
 # encoding: utf-8
 import optparse
+from threading import Thread
 import os
 from pexpect import pxssh
 
@@ -36,7 +37,8 @@ if __name__ == "__main__":
         with open(target_pwd_file) as f:
             one_line = f.readline().strip()
             while one_line:
-                print(one_line)
+                thd = Thread(target=connection, args=(target_host, target_user, one_line))
+                thd.start()
                 one_line = f.readline().strip()
     # connection(target_host, target_user, target_pwd_file)
     if Found:
