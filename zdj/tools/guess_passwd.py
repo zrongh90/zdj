@@ -13,12 +13,13 @@ print_lock = Lock()
 
 def connection(host, user, passwd):
     try:
-        print_lock.acquire()
+
         print('try passwd:{0}'.format(passwd))
         s = pxssh.pxssh()
         s.login(host, user, passwd)
         Found = True
         target_pwd = passwd
+        print_lock.acquire()
         if Found:
             print("found password:{2} for user:{0} on host:{1}".format(target_user, target_host, target_pwd))
     except Exception as e:
