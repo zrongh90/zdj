@@ -17,6 +17,8 @@ def connection(host, user, passwd):
         s.login(host, user, passwd)
         Found = True
         target_pwd = passwd
+        if Found:
+            print("found password:{2} for user:{0} on host:{1}".format(target_user, target_host, target_pwd))
     except Exception as e:
         print(e)
         print("can't not login!")
@@ -43,5 +45,4 @@ if __name__ == "__main__":
                 # thd.start()
                 one_line = f.readline().strip()
     # connection(target_host, target_user, target_pwd_file)
-    if Found:
-        print("found password:{2} for user:{0} on host:{1}".format(target_user, target_host, target_pwd))
+
