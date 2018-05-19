@@ -12,6 +12,7 @@ target_pwd = ""
 
 def connection(host, user, passwd):
     try:
+        print('try passwd:{0}'.format(passwd))
         s = pxssh.pxssh()
         s.login(host, user, passwd)
         Found = True
