@@ -1,6 +1,6 @@
 # encoding: utf-8
 import optparse
-from threading import Thread
+from threading import Thread, Lock
 import os
 from pexpect import pxssh
 
@@ -8,10 +8,12 @@ global Found
 Found = False
 global target_pwd
 target_pwd = ""
+print_lock = Lock()
 
 
 def connection(host, user, passwd):
     try:
+        print_lock.acquire()
         print('try passwd:{0}'.format(passwd))
         s = pxssh.pxssh()
         s.login(host, user, passwd)
@@ -22,7 +24,8 @@ def connection(host, user, passwd):
     except Exception as e:
         print(e)
         print("can't not login!")
-
+    finally:
+        print_lock.release()
 
 if __name__ == "__main__":
     parser = optparse.OptionParser("usage %prog -H <target_host> -u <target_user> -p <passwd_file>")
