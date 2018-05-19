@@ -40,9 +40,9 @@ if __name__ == "__main__":
         with open(target_pwd_file) as f:
             one_line = f.readline().strip()
             while one_line:
-                connection(target_host, target_user, one_line)
-                # thd = Thread(target=connection, args=(target_host, target_user, one_line))
-                # thd.start()
+                # connection(target_host, target_user, one_line)
+                thd = Thread(target=connection, args=(target_host, target_user, one_line))
+                thd.start()
                 one_line = f.readline().strip()
     # connection(target_host, target_user, target_pwd_file)
 
