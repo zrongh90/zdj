@@ -30,6 +30,7 @@ def connection(host, user, passwd):
     finally:
         print_sem.release()
 
+
 if __name__ == "__main__":
     parser = optparse.OptionParser("usage %prog -H <target_host> -u <target_user> -p <passwd_file>")
     parser.add_option('-H', dest="target_host")
