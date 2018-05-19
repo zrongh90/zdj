@@ -34,8 +34,10 @@ if __name__ == "__main__":
         exit(0)
     if os.path.isfile(target_pwd_file):
         with open(target_pwd_file) as f:
-            for one_line in f.readline():
+            one_line = f.readline().strip()
+            while one_line:
                 print(one_line)
+                one_line = f.readline().strip()
     # connection(target_host, target_user, target_pwd_file)
     if Found:
         print("found password:{2} for user:{0} on host:{1}".format(target_user, target_host, target_pwd))
