@@ -20,8 +20,9 @@ def connection(host, user, passwd):
         Found = True
         target_pwd = passwd
     except Exception as e:
+        pass
         # print(e)
-        print("{0} can't not login!".format(passwd))
+        # print("{0} can't not login!".format(passwd))
     finally:
         print_sem.release()
 
@@ -44,6 +45,7 @@ if __name__ == "__main__":
             while one_line:
                 if Found:
                     print("found password:{2} for user:{0} on host:{1}".format(target_user, target_host, target_pwd))
+                    exit(0)
                 # connection(target_host, target_user, one_line)
                 print('try passwd:{0}'.format(one_line))
                 thd = Thread(target=connection, args=(target_host, target_user, one_line))
