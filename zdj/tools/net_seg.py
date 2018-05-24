@@ -1,7 +1,8 @@
 # encoding: utf-8
 import psutil
-import re
+import os
 import socket
+import subprocess
 
 def is_valid_ip(ip):
     """Returns true if the given string is a well-formed IP address.
@@ -25,15 +26,19 @@ def is_valid_ip(ip):
 
 
 def get_ati_ka():
-    ip_list = []
-    for ka_name, info in psutil.net_if_addrs().items():
-        ip_addr = info[1][1]
+    ef_ip_list = []
+    for info in psutil.net_if_addrs().items():
+        ip_addr = info[1][1][1]
+        net_mask = info[1][1][2]
         if is_valid_ip(ip_addr):
-            ip_list.append(info[1][1])
-    print(ip_list)
+            ret = subprocess.getoutput('ping -n 1 {0}'.format(ip_addr))
+            if "已发送 = 1，已接收 = 1" in ret or "sended = 1, received = 1":
+                ef_ip_list.append((ip_addr, net_mask))
+    print(ef_ip_list)
 
 
-def get_net_seg(gw, mask):
+
+def get_net_seg():
     pass
 
 
