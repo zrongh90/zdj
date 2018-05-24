@@ -5,4 +5,7 @@ ptyprocess==0.5.2
 PyMySQL==0.8.0
 python-nmap==0.6.1
 pytz==2018.4
-
+IPy==0.83
+psutil==5.4.5
+nmap==0.0.1
+WMI==1.4.9
