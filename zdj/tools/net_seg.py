@@ -1,6 +1,6 @@
 # encoding: utf-8
 import psutil
-import os
+from IPy import IP
 import socket
 import subprocess
 
@@ -34,13 +34,20 @@ def get_ati_ka():
             ret = subprocess.getoutput('ping -n 1 {0}'.format(ip_addr))
             if "已发送 = 1，已接收 = 1" in ret or "sended = 1, received = 1":
                 ef_ip_list.append((ip_addr, net_mask))
-    print(ef_ip_list)
+    return ef_ip_list
 
 
 
-def get_net_seg():
-    pass
+def get_net_seg(ip_nm_list):
+    for one_tuple in ip_nm_list:
+        if one_tuple[1] is not None:
+            # 计算IP和NETMASK限定的所有IP列表
+            ip = IP(one_tuple[0]).make_net(one_tuple[1])
+            all_ip = [one_ip for one_ip in ip]
+            print(len(all_ip))
 
 
 if __name__ == '__main__':
-    get_ati_ka()
+    ef_ip_nm_list = get_ati_ka()
+    print(ef_ip_nm_list)
+    get_net_seg(ef_ip_nm_list)
