@@ -35,6 +35,10 @@ def nmap_scan(tgt_host, tgt_port):
     # import pdb; pdb.set_trace()
     # print(result)
     # port_info = result['scan'][tgt_host]['tcp'][int(tgt_port)]
+    # import pdb;pdb.set_trace()
+    if len(result['scan']) == 0:
+        # 如果nmap无法扫描到结果，继续
+        return
     scan_result = result['scan'][tgt_host]['tcp']
     for one in scan_result.keys():
         port_num = one
