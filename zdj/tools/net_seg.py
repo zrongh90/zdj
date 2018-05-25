@@ -46,6 +46,7 @@ def get_ati_ka(platform):
 
 
 def get_net_seg(ip_nm_list):
+    ip_nm_list.pop('127.0.0.1')
     for one_tuple in ip_nm_list:
         if one_tuple[1] is not None:
             # 计算IP和NETMASK限定的所有IP列表
