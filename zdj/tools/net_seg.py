@@ -48,15 +48,16 @@ def get_ati_ka(platform):
 
 
 def get_net_seg(ip_nm_list):
+    all_ip_list = []
     for one_tuple in ip_nm_list:
         if one_tuple[1] is not None:
             # 计算IP和NETMASK限定的所有IP列表
             ip = IP(one_tuple[0]).make_net(one_tuple[1])
             all_ip = [one_ip for one_ip in ip]
-            print(len(all_ip))
+            all_ip_list.append(all_ip)
+    return all_ip_list
 
 
 if __name__ == '__main__':
     ef_ip_nm_list = get_ati_ka(platform.platform())
-    print(ef_ip_nm_list)
-    get_net_seg(ef_ip_nm_list)
+    print(get_net_seg(ef_ip_nm_list))
