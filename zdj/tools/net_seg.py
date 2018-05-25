@@ -28,9 +28,11 @@ def is_valid_ip(ip):
 
 def get_ati_ka(platform):
     ef_ip_list = []
-    for info in psutil.net_if_addrs().items():
-        ip_addr = info[1][1][1]
-        net_mask = info[1][1][2]
+    for key, info in psutil.net_if_addrs().items():
+        if 'window' in platform.lower():
+            ip_addr, net_mask = info[1][1:3]
+        elif 'linux' in platform.lower():
+            ip_addr, net_mask = info[0][1:3]
         if is_valid_ip(ip_addr):
             if 'window' in platform.lower():
                 ret = subprocess.getoutput('ping -n 1 {0}'.format(ip_addr))
@@ -41,7 +43,6 @@ def get_ati_ka(platform):
                 if "1 packets transmitted, 1 received" in ret:
                     ef_ip_list.append((ip_addr, net_mask))
     return ef_ip_list
-
 
 
 def get_net_seg(ip_nm_list):
