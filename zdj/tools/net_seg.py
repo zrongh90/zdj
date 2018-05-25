@@ -3,6 +3,7 @@ import psutil
 from IPy import IP
 import socket
 import subprocess
+import platform
 
 def is_valid_ip(ip):
     """Returns true if the given string is a well-formed IP address.
@@ -25,15 +26,20 @@ def is_valid_ip(ip):
     return True
 
 
-def get_ati_ka():
+def get_ati_ka(platform):
     ef_ip_list = []
     for info in psutil.net_if_addrs().items():
         ip_addr = info[1][1][1]
         net_mask = info[1][1][2]
         if is_valid_ip(ip_addr):
-            ret = subprocess.getoutput('ping -n 1 {0}'.format(ip_addr))
-            if "已发送 = 1，已接收 = 1" in ret or "sended = 1, received = 1":
-                ef_ip_list.append((ip_addr, net_mask))
+            if 'window' in platform.lower():
+                ret = subprocess.getoutput('ping -n 1 {0}'.format(ip_addr))
+                if u"已发送 = 1，已接收 = 1" in ret:
+                    ef_ip_list.append((ip_addr, net_mask))
+            elif 'linux' in platform.lower():
+                ret = subprocess.getoutput('ping -c 1 {0}'.format(ip_addr))
+                if "1 packets transmitted, 1 received" in ret:
+                    ef_ip_list.append((ip_addr, net_mask))
     return ef_ip_list
 
 
@@ -48,6 +54,6 @@ def get_net_seg(ip_nm_list):
 
 
 if __name__ == '__main__':
-    ef_ip_nm_list = get_ati_ka()
+    ef_ip_nm_list = get_ati_ka(platform.platform())
     print(ef_ip_nm_list)
     get_net_seg(ef_ip_nm_list)
