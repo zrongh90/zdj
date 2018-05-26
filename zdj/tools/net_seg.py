@@ -4,6 +4,7 @@ from IPy import IP
 import socket
 import subprocess
 import platform
+from zdj.tools import portscanner
 
 def is_valid_ip(ip):
     """Returns true if the given string is a well-formed IP address.
@@ -60,4 +61,6 @@ def get_net_seg(ip_nm_list):
 
 if __name__ == '__main__':
     ef_ip_nm_list = get_ati_ka(platform.platform())
-    print(get_net_seg(ef_ip_nm_list))
+    # print(get_net_seg(ef_ip_nm_list))
+    for i in get_net_seg(ef_ip_nm_list):
+        portscanner.port_scan(i.strNormal(), 80)
