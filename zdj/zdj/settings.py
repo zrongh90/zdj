@@ -85,7 +85,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zdj_dev',
-        'HOST':'192.168.100.20',
+        'HOST':'192.168.43.251',
         'PORT':'3306',
         'USER':'root',
         'PASSWORD':'hujnhu123',
