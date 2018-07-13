@@ -1,0 +1,7 @@
+#!/usr/bin/expect
+# 通过spawn执行一个命令或程序，之后所有的Expect操作都会在这个执行过的命令或程序进程中进行，包括自动交互功能
+spawn ssh root@localhost uptime
+expect "*password"
+send "hujnhu123\n"
+expect eof
+
