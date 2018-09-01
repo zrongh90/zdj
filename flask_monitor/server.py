@@ -3,6 +3,8 @@ from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from flask_monitor.models.BaseModels import LinuxServerModel
 from flask_monitor.database import DB_session
+from sqlalchemy import and_
+from datetime import datetime
 
 app = Flask(__name__)
 api = Api(app)
@@ -31,19 +33,24 @@ class LinuxServer(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('hostname',type=str)
         parser.add_argument('cpu_percent', type=float)
+        parser.add_argument('memort_percent', type=float)
+        parser.add_argument('collect_time', type=str)
         parser.add_argument('ip_addr', type=str)
         args = parser.parse_args()
         in_hostname = args['hostname']
         in_ip_addr = args['ip_addr']
+        in_collect_time = args['collect_time']
         in_cpu_percent = args['cpu_percent']
         session = DB_session()
-        match_server = session.query(LinuxServerModel).filter(LinuxServerModel.hostname==in_hostname).\
-            filter(LinuxServerModel.ip_addr==in_ip_addr).all()
+        match_server = session.query(LinuxServerModel).filter(and_(LinuxServerModel.hostname == in_hostname,
+                                                                   LinuxServerModel.ip_addr == in_ip_addr)).all()
         if len(match_server) == 0:
             print('init new server and add collect data')
             new_linux_server = LinuxServerModel(hostname=in_hostname, ip_addr=in_ip_addr)
             session.add(new_linux_server)
+            session.flush()
             session.commit()
+            return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}
         elif len(match_server) == 1:
             print('add collect data')
         else:
