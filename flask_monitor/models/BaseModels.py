@@ -30,6 +30,7 @@ class LinuxServerModel(Base):
     def __repr__(self):
         return '<LinuxServer:{0}_{1}>'.format(self.hostname, self.ip_addr)
 
+
 class ServerStatusModel(Base):
     __tablename__ = '__ServerStatus__'
     id = Column(Integer, primary_key=True, autoincrement=True)

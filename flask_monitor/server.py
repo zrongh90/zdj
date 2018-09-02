@@ -1,7 +1,7 @@
 # encoding: utf-8
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-from flask_monitor.models.BaseModels import LinuxServerModel
+from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel
 from flask_monitor.database import DB_session
 from sqlalchemy import and_
 from datetime import datetime
@@ -39,8 +39,10 @@ class LinuxServer(Resource):
         args = parser.parse_args()
         in_hostname = args['hostname']
         in_ip_addr = args['ip_addr']
-        in_collect_time = args['collect_time']
+        in_mem_percent = args['mem_percent']
         in_cpu_percent = args['cpu_percent']
+        # 对采集时间进行格式化
+        in_collect_time= datetime.strptime(args['collect_time'], '%Y/%m/%d %H:%M:%S')
         session = DB_session()
         match_server = session.query(LinuxServerModel).filter(and_(LinuxServerModel.hostname == in_hostname,
                                                                    LinuxServerModel.ip_addr == in_ip_addr)).all()
@@ -53,6 +55,12 @@ class LinuxServer(Resource):
             return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}
         elif len(match_server) == 1:
             print('add collect data')
+            new_collect = ServerStatusModel(server_id=match_server.id, cpu_percent=in_cpu_percent,
+                                            mem_percent=in_mem_percent,collect_time=in_collect_time)
+            session.add(new_collect)
+            session.flush()
+            session.commit()
+            return {'server_id': match_server.id, 'collect_id': new_collect.id}
         else:
             print('match server error')
         session.close()
