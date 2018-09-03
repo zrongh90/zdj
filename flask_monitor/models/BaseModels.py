@@ -37,6 +37,7 @@ class ServerStatusModel(Base):
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
     cpu_percent = Column(Float, nullable=True, default=0.0, comment="CPU使用率")
     mem_percent = Column(Float, nullable=True, default=0.0, comment="内存使用率")
+    # TODO: 采集时间+服务器ID需要唯一化
     collect_time = Column(DateTime, nullable=False, default=datetime.now(), comment="采集时间")
 
     def __init__(self, server_id=None, cpu_percent=None, mem_percent=None, collect_time=None):

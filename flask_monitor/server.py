@@ -5,6 +5,7 @@ from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel
 from flask_monitor.database import DB_session
 from sqlalchemy import and_
 from datetime import datetime
+from flask_monitor.logger import logger
 
 app = Flask(__name__)
 api = Api(app)
@@ -33,7 +34,7 @@ class LinuxServer(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('hostname',type=str)
         parser.add_argument('cpu_percent', type=float)
-        parser.add_argument('memort_percent', type=float)
+        parser.add_argument('mem_percent', type=float)
         parser.add_argument('collect_time', type=str)
         parser.add_argument('ip_addr', type=str)
         args = parser.parse_args()
@@ -41,25 +42,30 @@ class LinuxServer(Resource):
         in_ip_addr = args['ip_addr']
         in_mem_percent = args['mem_percent']
         in_cpu_percent = args['cpu_percent']
+
         # 对采集时间进行格式化
         in_collect_time= datetime.strptime(args['collect_time'], '%Y/%m/%d %H:%M:%S')
         session = DB_session()
-        match_server = session.query(LinuxServerModel).filter(and_(LinuxServerModel.hostname == in_hostname,
+        match_servers = session.query(LinuxServerModel).filter(and_(LinuxServerModel.hostname == in_hostname,
                                                                    LinuxServerModel.ip_addr == in_ip_addr)).all()
-        if len(match_server) == 0:
-            print('init new server and add collect data')
+        if len(match_servers) == 0:
+
+            logger.debug('init new server and add collect data')
             new_linux_server = LinuxServerModel(hostname=in_hostname, ip_addr=in_ip_addr)
             session.add(new_linux_server)
             session.flush()
             session.commit()
             return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}
-        elif len(match_server) == 1:
-            print('add collect data')
+        elif len(match_servers) == 1:
+            logger.debug('add collect data')
+            match_server = match_servers[0]  # 获取匹配的服务器记录
+            logger.debug('mathc server {0}'.format(match_server))
             new_collect = ServerStatusModel(server_id=match_server.id, cpu_percent=in_cpu_percent,
                                             mem_percent=in_mem_percent,collect_time=in_collect_time)
             session.add(new_collect)
             session.flush()
             session.commit()
+            logger.debug('add collect data success! item {0}'.format(new_collect))
             return {'server_id': match_server.id, 'collect_id': new_collect.id}
         else:
             print('match server error')
