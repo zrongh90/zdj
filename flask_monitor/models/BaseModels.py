@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, UniqueConstraint
 from flask_monitor.database import Base
 from datetime import datetime
 
 
 class UserModel(Base):
     __tablename__ = 'users'
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True)
     email = Column(String(120), unique=True)
@@ -19,6 +20,7 @@ class UserModel(Base):
 
 class LinuxServerModel(Base):
     __tablename__ = '__LinuxServer__'
+    __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
     hostname = Column(String(50), nullable=False)
     ip_addr = Column(String(50), nullable=False)
@@ -39,6 +41,7 @@ class ServerStatusModel(Base):
     mem_percent = Column(Float, nullable=True, default=0.0, comment="内存使用率")
     # TODO: 采集时间+服务器ID需要唯一化
     collect_time = Column(DateTime, nullable=False, default=datetime.now(), comment="采集时间")
+    __table_args__ = (UniqueConstraint('collect_time','server_id',name='_server_collect_uq_'),{'extend_existing': True})
 
     def __init__(self, server_id=None, cpu_percent=None, mem_percent=None, collect_time=None):
         self.server_id = server_id
