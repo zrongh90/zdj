@@ -27,8 +27,14 @@ class LinuxServer(Resource):
         match_servers = session.query(LinuxServerModel).filter(LinuxServerModel.id==server_id).all()
         if len(match_servers) == 1:
             match_server = match_servers[0]
+            # 获取服务器的当前状态
+            server_status = session.query(ServerStatusModel).filter(
+                ServerStatusModel.server_id==match_server.id).order_by(ServerStatusModel.collect_time.desc())[0]
             logger.debug('get LinuxServer: {0}'.format(match_server))
             match_server_dict = table_obj_2_dict(match_server)  # 对结果对象转为dict
+            server_status_dict = table_obj_2_dict(server_status)  # 对结果对象转为dict
+            # 服务器status为从属状态
+            match_server_dict['status'] = server_status_dict
             session.close()
             return {'server': match_server_dict}, 200
         else:
