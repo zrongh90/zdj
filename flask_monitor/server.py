@@ -64,11 +64,12 @@ class LinuxServer(Resource):
         in_cpu_percent = args['cpu_percent']
 
         # 对采集时间进行格式化
-        in_collect_time= datetime.strptime((args['collect_time'] if args['collect_time'] is not None else '2018/01/01 00:00:00'), '%Y/%m/%d %H:%M:%S')
+        in_collect_time= datetime.strptime((args['collect_time'] if args['collect_time'] is not None else '1900/01/01 00:00:00'), '%Y/%m/%d %H:%M:%S')
         session = DB_session()
         match_servers = session.query(LinuxServerModel).filter(and_(LinuxServerModel.hostname == in_hostname,
-                                                                   LinuxServerModel.ip_addr == in_ip_addr)).all()
+                                                                    LinuxServerModel.ip_addr == in_ip_addr)).all()
         if len(match_servers) == 0:
+
             logger.debug('init new server and add collect data')
             new_linux_server = LinuxServerModel(hostname=in_hostname, ip_addr=in_ip_addr)
             session.add(new_linux_server)
@@ -77,8 +78,12 @@ class LinuxServer(Resource):
             return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 200
         elif len(match_servers) == 1:
             logger.debug('add collect data')
+            if args['collect_time'] is None:
+                # TODO: 没有采集数据时新增服务器问题
+                logger.warning('collect_time is None,not add collect data')
+                return {'collect_id': None}, 406
             match_server = match_servers[0]  # 获取匹配的服务器记录
-            logger.debug('mathc server {0}'.format(match_server))
+            logger.debug('match server {0}'.format(match_server))
             new_collect = ServerStatusModel(server_id=match_server.id, cpu_percent=in_cpu_percent,
                                             mem_percent=in_mem_percent,collect_time=in_collect_time)
             try:
