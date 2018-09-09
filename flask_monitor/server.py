@@ -43,13 +43,15 @@ class LinuxServer(Resource):
             logger.debug('match LinuxServer count is {0}.'.format(len(match_servers)))
             session.close()
             return {'server': None}, 404
+
     def post(self):
         """
         客户端post请求，将收集的客户端服务器信息反馈到服务端
-        :param: host_name：主机ming
+        :param: hostname：主机ming
         :param: cpu_percent: 主机CPU利用率
         :param: mem_usage: 内存利用率
-        :return:
+        :param: collect_time: 采集时间
+        :return: ip_addr: 服务器IP地址
         """
         parser = reqparse.RequestParser()
         parser.add_argument('hostname',type=str)
@@ -69,7 +71,6 @@ class LinuxServer(Resource):
         match_servers = session.query(LinuxServerModel).filter(and_(LinuxServerModel.hostname == in_hostname,
                                                                     LinuxServerModel.ip_addr == in_ip_addr)).all()
         if len(match_servers) == 0:
-
             logger.debug('init new server and add collect data')
             new_linux_server = LinuxServerModel(hostname=in_hostname, ip_addr=in_ip_addr)
             session.add(new_linux_server)
@@ -79,7 +80,7 @@ class LinuxServer(Resource):
         elif len(match_servers) == 1:
             logger.debug('add collect data')
             if args['collect_time'] is None:
-                # TODO: 没有采集数据时新增服务器问题
+                # 没有采集数据时新增服务器问题
                 logger.warning('collect_time is None,not add collect data')
                 return {'collect_id': None}, 406
             match_server = match_servers[0]  # 获取匹配的服务器记录

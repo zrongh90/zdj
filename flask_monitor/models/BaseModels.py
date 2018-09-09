@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, UniqueConstraint
 from flask_monitor.database import Base
+from sqlalchemy_utils.types.choice import ChoiceType
 from datetime import datetime
 
 
@@ -51,3 +52,15 @@ class ServerStatusModel(Base):
 
     def __repr__(self):
         return '<ServerStatus:{0}_{1}>'.format(self.server_id, self.collect_time)
+
+
+class WASServerModel(Base):
+    STATUS_CHOICE = {
+        (0, 'STOP'),
+        (1, 'RUNNING'),
+        (2, 'UNKNOWN')
+    } # 目前支持三种状态: 0-停止；1-运行中；2-未知
+    __tablename__ = '__WASServerModel__'
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
+    status = Column(ChoiceType(STATUS_CHOICE))
