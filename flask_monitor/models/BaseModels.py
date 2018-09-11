@@ -40,7 +40,7 @@ class ServerStatusModel(Base):
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
     cpu_percent = Column(Float, nullable=True, default=0.0, comment="CPU使用率")
     mem_percent = Column(Float, nullable=True, default=0.0, comment="内存使用率")
-    # TODO: 采集时间+服务器ID需要唯一化
+    # 采集时间+服务器ID需要唯一化
     collect_time = Column(DateTime, nullable=False, default=datetime.now(), comment="采集时间")
     __table_args__ = (UniqueConstraint('collect_time','server_id',name='_server_collect_uq_'),{'extend_existing': True})
 
@@ -64,3 +64,10 @@ class WASServerModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
     status = Column(ChoiceType(STATUS_CHOICE))
+
+    def __init__(self, server_id=None, status=0):
+        self.server_id = server_id
+        self.status = status
+
+    def __repr__(self):
+        return '<WASServer:{0}_{1}>'.format(self.id, self.status)
