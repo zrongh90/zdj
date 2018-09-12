@@ -61,7 +61,7 @@ class WASServerModel(Base):
         (2, 'UNKNOWN')
     } # 目前支持三种状态: 0-停止；1-运行中；2-未知
     __tablename__ = '__WASServerModel__'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="唯一键")
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
     status = Column(ChoiceType(STATUS_CHOICE))
 
