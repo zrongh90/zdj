@@ -63,6 +63,7 @@ class WASServerModel(Base):
     __tablename__ = '__WASServerModel__'
     id = Column(Integer, primary_key=True, autoincrement=True, comment="唯一键")
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
+    was_name = Column(String(50), nullable=False)
     status = Column(ChoiceType(STATUS_CHOICE))
 
     def __init__(self, server_id=None, status=0):
