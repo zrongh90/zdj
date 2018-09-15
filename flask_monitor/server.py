@@ -1,5 +1,5 @@
 # encoding: utf-8
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import Api, Resource, reqparse
 from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel
 from flask_monitor.database import DB_session
@@ -8,9 +8,10 @@ from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from flask_monitor.logger import logger
 from utils import table_obj_2_dict
+from conf import errors
 
 app = Flask(__name__)
-api = Api(app)
+api = Api(app, catch_all_404s=True, errors=errors)
 
 
 class LinuxServer(Resource):
