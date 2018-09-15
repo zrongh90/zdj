@@ -54,11 +54,13 @@ class LinuxServer(Resource):
         :return: ip_addr: 服务器IP地址
         """
         parser = reqparse.RequestParser()
-        parser.add_argument('hostname',type=str)
+        # 控制输入参数必须包含hostname和ip_addr
+        parser.add_argument('hostname',type=str, required=True, help='hostname is required')
+        parser.add_argument('ip_addr', type=str, required=True, help='ip address is required')
         parser.add_argument('cpu_percent', type=float)
         parser.add_argument('mem_percent', type=float)
         parser.add_argument('collect_time', type=str)
-        parser.add_argument('ip_addr', type=str)
+
         args = parser.parse_args()
         in_hostname = args['hostname']
         in_ip_addr = args['ip_addr']
