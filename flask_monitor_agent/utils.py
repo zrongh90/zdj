@@ -1,7 +1,7 @@
 # encoding: utf-8
 # 定义agent使用的所有方法，例如如何获取hostname,IP等
 import socket
-
+import psutil
 
 def get_hostname():
     """
@@ -18,3 +18,19 @@ def get_ip_address():
     :return: ip地址的字符串
     """
     return socket.gethostbyname(get_hostname())
+
+
+def get_cpu_percent():
+    """
+    通过psutil的cpu_percent模块获取cpu使用率
+    :return: cpu使用率
+    """
+    return psutil.cpu_percent()
+
+
+def get_mem_percent():
+    """
+    通过psutil的virtual_memory模块获取内存的使用情况
+    :return: mem使用率
+    """
+    return psutil.virtual_memory().percent

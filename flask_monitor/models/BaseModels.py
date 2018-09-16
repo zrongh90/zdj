@@ -25,6 +25,7 @@ class LinuxServerModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     hostname = Column(String(50), nullable=False)
     ip_addr = Column(String(50), nullable=False)
+    # TODO: 新增cpu个数及内容总量情况
 
     def __init__(self, hostname=None, ip_addr=None):
         self.hostname = hostname
