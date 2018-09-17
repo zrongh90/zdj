@@ -34,3 +34,19 @@ def get_mem_percent():
     :return: mem使用率
     """
     return psutil.virtual_memory().percent
+
+
+def get_cpu_core_num():
+    """
+    通过psutil的cpu_count方法获取CPU的格式
+    :return: cpu个数
+    """
+    return psutil.cpu_count()
+
+
+def get_memory():
+    """
+    获取psutil的virtual_memory返回的内存大小，以MB为单位
+    :return: 内存大小，以MB为单位
+    """
+    return psutil.virtual_memory().total/1024/1024

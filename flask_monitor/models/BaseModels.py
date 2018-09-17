@@ -25,11 +25,14 @@ class LinuxServerModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     hostname = Column(String(50), nullable=False)
     ip_addr = Column(String(50), nullable=False)
-    # TODO: 新增cpu个数及内容总量情况
+    cpu_core_num = Column(Integer, nullable=False, comment='CPU core数目')
+    memory = Column(Float, nullable=False, comment='内存大小(MB)')
 
-    def __init__(self, hostname=None, ip_addr=None):
+    def __init__(self, hostname, ip_addr, cpu_core_num, memory):
         self.hostname = hostname
         self.ip_addr = ip_addr
+        self.cpu_core_num = cpu_core_num
+        self.memory = memory
 
     def __repr__(self):
         return '<LinuxServer:{0}_{1}>'.format(self.hostname, self.ip_addr)

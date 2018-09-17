@@ -61,12 +61,16 @@ class LinuxServer(Resource):
         parser.add_argument('cpu_percent', type=float)
         parser.add_argument('mem_percent', type=float)
         parser.add_argument('collect_time', type=str)
+        parser.add_argument('cpu_core_num', type=int)
+        parser.add_argument('memory', type=float)
 
         args = parser.parse_args()
         in_hostname = args['hostname']
         in_ip_addr = args['ip_addr']
         in_mem_percent = args['mem_percent']
         in_cpu_percent = args['cpu_percent']
+        in_cpu_core_num = args['cpu_core_num']
+        in_memory = args['memory']
 
         # 对采集时间进行格式化
         in_collect_time= datetime.strptime((args['collect_time'] if args['collect_time'] is not None else '1900/01/01 00:00:00'), '%Y/%m/%d %H:%M:%S')
@@ -75,7 +79,8 @@ class LinuxServer(Resource):
                                                                     LinuxServerModel.ip_addr == in_ip_addr)).all()
         if len(match_servers) == 0:
             logger.debug('init new server and add collect data')
-            new_linux_server = LinuxServerModel(hostname=in_hostname, ip_addr=in_ip_addr)
+            new_linux_server = LinuxServerModel(hostname=in_hostname, ip_addr=in_ip_addr, cpu_core_num=in_cpu_core_num,
+                                                memory=in_memory)
             session.add(new_linux_server)
             session.flush()
             session.commit()
