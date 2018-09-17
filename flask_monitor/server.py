@@ -86,6 +86,9 @@ class LinuxServer(Resource):
             session.commit()
             return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 200
         elif len(match_servers) == 1:
+            logger.debug('update server changeable parameter')
+            # TODO: 考虑主机的可变参数的变化，例如CPU数目/内存大小
+
             logger.debug('add collect data')
             if args['collect_time'] is None:
                 # 没有采集数据时新增服务器问题
