@@ -86,9 +86,6 @@ class LinuxServer(Resource):
             session.commit()
             return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 200
         elif len(match_servers) == 1:
-            logger.debug('update server changeable parameter')
-            # TODO: 考虑主机的可变参数的变化，例如CPU数目/内存大小
-
             logger.debug('add collect data')
             if args['collect_time'] is None:
                 # 没有采集数据时新增服务器问题
@@ -96,6 +93,11 @@ class LinuxServer(Resource):
                 return {'collect_id': None}, 406
             match_server = match_servers[0]  # 获取匹配的服务器记录
             logger.debug('match server {0}'.format(match_server))
+            if match_server.cpu_core_num != in_cpu_core_num or match_server.memory != in_memory:
+                # 考虑主机的可变参数的变化，例如CPU数目/内存大小
+                logger.debug('update server changeable parameter')
+                match_server.cpu_core_num = in_cpu_core_num
+                match_server.memory = in_memory
             new_collect = ServerStatusModel(server_id=match_server.id, cpu_percent=in_cpu_percent,
                                             mem_percent=in_mem_percent,collect_time=in_collect_time)
             try:

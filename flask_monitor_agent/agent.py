@@ -48,5 +48,5 @@ def upload_server_status():
 
 if __name__ == '__main__':
     # post(url='http://127.0.0.1/LinuxServer', data={''})
-    # get_server_status(6)
-    upload_server_status()
+    get_server_status(1)
+    # upload_server_status()
