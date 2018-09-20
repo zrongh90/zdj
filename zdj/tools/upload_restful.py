@@ -12,13 +12,17 @@ api = Api(app)
 class UploadFileAPI(Resource):
     def post(self):
         parse = reqparse.RequestParser()
-        parse.add_argument('file_s', type=datastructures.FileStorage, location='files')
+        # 此处应对应input里的name，通过append将upload的文件合并到一个参数内，遍历得到的文件
+        # name="input-b6[]"
+        parse.add_argument('input-b6[]', type=datastructures.FileStorage, location='files', action='append')
         args = parse.parse_args()
-        file_stream = args['file_s']
-        file_sn = file_stream.filename
-        uuid_str = uuid.uuid4().hex
-        new_filename = '{0}{1}'.format(uuid_str, os.path.splitext(file_sn)[1])
-        file_stream.save(new_filename)
+        file_streams = args['input-b6[]']  # 获取上传的文件列表
+        for file_stream in file_streams:
+            # 遍历上传列表中的单个文件
+            file_sn = file_stream.filename
+            uuid_str = uuid.uuid4().hex
+            new_filename = '{0}{1}'.format(uuid_str, os.path.splitext(file_sn)[1])
+            file_stream.save(new_filename)
 
 
 api.add_resource(UploadFileAPI, '/upload')
