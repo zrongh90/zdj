@@ -20,6 +20,7 @@ class UploadFileAPI(Resource):
         for file_stream in file_streams:
             # 遍历上传列表中的单个文件
             file_sn = file_stream.filename
+            # 生成随机的文件名
             uuid_str = uuid.uuid4().hex
             new_filename = '{0}{1}'.format(uuid_str, os.path.splitext(file_sn)[1])
             file_stream.save(new_filename)
