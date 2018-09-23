@@ -7,14 +7,45 @@ from sqlalchemy import and_
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from flask_monitor.logger import logger
-from utils import table_obj_2_dict
-from conf import errors
+from flask_monitor.utils import table_obj_2_dict
+from flask_monitor.conf import errors
+from flask_httpauth import HTTPTokenAuth
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'this is secure'
 api = Api(app, catch_all_404s=True, errors=errors)
+auth = HTTPTokenAuth()
+s_obj = Serializer(app.config['SECRET_KEY'], expires_in=600)
 
+
+def generate_auth_token(user_id):
+    return s_obj.dumps({'user_id': user_id})
+
+
+@auth.verify_token
+def verify_token(token):
+    print(s_obj.loads(token))
+    print('get token and verify')
+    return True
+
+
+class User(Resource):
+    def get(self):
+
+        pass
+
+    def post(self):
+        # parser = reqparse.RequestParser()
+        # parser.add_argument()
+        token = generate_auth_token(1)
+        import pdb;pdb.set_trace()
+        return {'token': token.decode('ascii')}
 
 class LinuxServer(Resource):
+    decorators = [auth.login_required]
+
     def get(self):
         """
         获取主机的信息
@@ -31,7 +62,7 @@ class LinuxServer(Resource):
             logger.debug('get LinuxServer: {0}'.format(match_server))
             # 获取服务器的当前状态,以采集时间倒序
             server_status = session.query(ServerStatusModel).filter(
-                ServerStatusModel.server_id==match_server.id).order_by(ServerStatusModel.collect_time.desc()).first()
+                ServerStatusModel.server_id == match_server.id).order_by(ServerStatusModel.collect_time.desc()).first()
             match_server_dict = table_obj_2_dict(match_server)  # 对结果对象转为dict
             if server_status:
                 server_status_dict = table_obj_2_dict(server_status)  # 对结果对象转为dict
@@ -127,6 +158,7 @@ class WasServer(Resource):
 
 
 api.add_resource(LinuxServer, '/LinuxServer')
+api.add_resource(User, '/User')
 
 
 if __name__ == '__main__':
