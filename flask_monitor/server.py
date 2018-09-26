@@ -1,21 +1,28 @@
 # encoding: utf-8
-from flask import Flask, jsonify
+import hmac
+import hashlib
+from flask import Flask
 from flask_restful import Api, Resource, reqparse
-from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel
+from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel, UserModel
 from flask_monitor.database import DB_session
 from sqlalchemy import and_
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
+from flask_sqlalchemy import SQLAlchemy
 from flask_monitor.logger import logger
 from flask_monitor.utils import table_obj_2_dict
 from flask_monitor.conf import errors
 from flask_httpauth import HTTPTokenAuth
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+from itsdangerous import SignatureExpired
+from flask_migrate import Migrate
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'this is secure'
+db = SQLAlchemy(app)
+app.config['SECRET_KEY'] = b'this is secure'
 api = Api(app, catch_all_404s=True, errors=errors)
+migrate = Migrate(app, )
 auth = HTTPTokenAuth()
 s_obj = Serializer(app.config['SECRET_KEY'], expires_in=600)
 
@@ -26,9 +33,18 @@ def generate_auth_token(user_id):
 
 @auth.verify_token
 def verify_token(token):
-    print(s_obj.loads(token))
-    print('get token and verify')
-    return True
+    in_user_id = None
+    try:
+        in_user_id = s_obj.loads(token)['user_id']
+    except SignatureExpired:
+        # 如果密码获取，将认证失败
+        return False
+    else:
+        # 如果token未过期，则进行用户的认证
+        session = DB_session()
+        session.query(UserModel).filter(UserModel.id==in_user_id).get
+        print('get token and verify')
+        return True
 
 
 class User(Resource):
@@ -37,13 +53,31 @@ class User(Resource):
         pass
 
     def post(self):
-        # parser = reqparse.RequestParser()
-        # parser.add_argument()
-        token = generate_auth_token(1)
-        import pdb;pdb.set_trace()
-        return {'token': token.decode('ascii')}
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, required=True, help="username is required")
+        parser.add_argument('password', type=str, required=True, help="password is required")
+        parser.add_argument('email', type=str)
+        args = parser.parse_args()
+        password_hash = hmac.new(app.secret_key,args['password'].encode('utf-8'), hashlib.sha256).hexdigest()
+        session = DB_session()
+        match_users = session.query(UserModel).filter(UserModel.name==args['username']).all()
+        if len(match_users) == 1:
+            match_user = match_users
+            token = generate_auth_token(match_user.id)
+            return {'token': token.decode('ascii')}, 200
+        elif len(match_users) == 0:
+            new_user = UserModel(name=args['username'], password=password_hash, email=args['email'])
+            session.add(new_user)
+            session.flush()
+            session.commit()
+            token = generate_auth_token(new_user.id)
+            return {'token': token.decode('ascii')}, 200
+        else:
+            return {'message': 'query user error'}, 404
+
 
 class LinuxServer(Resource):
+    # 使用http-auth进行登录认证
     decorators = [auth.login_required]
 
     def get(self):
