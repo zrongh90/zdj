@@ -22,6 +22,7 @@ app = Flask(__name__)
 db = SQLAlchemy(app)
 app.config['SECRET_KEY'] = b'this is secure'
 api = Api(app, catch_all_404s=True, errors=errors)
+# TODO: 通过flask migrate 控制数据库初始化/升级
 migrate = Migrate(app, )
 auth = HTTPTokenAuth()
 s_obj = Serializer(app.config['SECRET_KEY'], expires_in=600)

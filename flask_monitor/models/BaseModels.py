@@ -5,9 +5,9 @@ from datetime import datetime
 
 
 class UserModel(Base):
-    __tablename__ = 'users'
+    __tablename__ = '__UserModel__'
     __table_args__ = {'extend_existing': True}
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), unique=True)
     email = Column(String(120), unique=True)
     password = Column(String(120), nullable=False)
@@ -19,6 +19,7 @@ class UserModel(Base):
 
     def __repr__(self):
         return '<User %r>' % (self.name)
+
 
 
 class LinuxServerModel(Base):
