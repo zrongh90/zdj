@@ -19,6 +19,7 @@ from itsdangerous import SignatureExpired
 app = Flask(__name__)
 app.config['SECRET_KEY'] = b'this is secure'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_monitor.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 api = Api(app, catch_all_404s=True, errors=errors)
 
 auth = HTTPTokenAuth()
