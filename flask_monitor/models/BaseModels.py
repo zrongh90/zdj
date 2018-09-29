@@ -2,9 +2,16 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, Uni
 from flask_monitor.database import Base
 from sqlalchemy_utils.types.choice import ChoiceType
 from datetime import datetime
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from flask_monitor.wsgi import app
+
+db = SQLAlchemy(app)
+# TODO: 通过flask migrate 控制数据库初始化/升级
+migrate = Migrate(app, db)
 
 
-class UserModel(Base):
+class UserModel(db.Model):
     __tablename__ = '__UserModel__'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -22,7 +29,7 @@ class UserModel(Base):
 
 
 
-class LinuxServerModel(Base):
+class LinuxServerModel(db.Model):
     __tablename__ = '__LinuxServer__'
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -41,7 +48,7 @@ class LinuxServerModel(Base):
         return '<LinuxServer:{0}_{1}>'.format(self.hostname, self.ip_addr)
 
 
-class ServerStatusModel(Base):
+class ServerStatusModel(db.Model):
     __tablename__ = '__ServerStatus__'
     id = Column(Integer, primary_key=True, autoincrement=True)
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
@@ -61,7 +68,7 @@ class ServerStatusModel(Base):
         return '<ServerStatus:{0}_{1}>'.format(self.server_id, self.collect_time)
 
 
-class WASServerModel(Base):
+class WASServerModel(db.Model):
     STATUS_CHOICE = {
         (0, 'STOP'),
         (1, 'RUNNING'),
@@ -71,7 +78,7 @@ class WASServerModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, comment="唯一键")
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
     was_name = Column(String(50), nullable=False)
-    status = Column(ChoiceType(STATUS_CHOICE))
+    # status = Column(ChoiceType(STATUS_CHOICE))
 
     def __init__(self, server_id=None, status=0):
         self.server_id = server_id

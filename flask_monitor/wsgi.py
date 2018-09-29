@@ -3,30 +3,28 @@ import hmac
 import hashlib
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
-from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel, UserModel
+
 from flask_monitor.database import DB_session
 from sqlalchemy import and_
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
-from flask_sqlalchemy import SQLAlchemy
 from flask_monitor.logger import logger
 from flask_monitor.utils import table_obj_2_dict
 from flask_monitor.conf import errors
 from flask_httpauth import HTTPTokenAuth
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import SignatureExpired
-from flask_migrate import Migrate
 
 
 app = Flask(__name__)
-db = SQLAlchemy(app)
 app.config['SECRET_KEY'] = b'this is secure'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flask_monitor.db'
 api = Api(app, catch_all_404s=True, errors=errors)
-# TODO: 通过flask migrate 控制数据库初始化/升级
-migrate = Migrate(app, )
+
 auth = HTTPTokenAuth()
 s_obj = Serializer(app.config['SECRET_KEY'], expires_in=600)
 
+from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel, UserModel
 
 def generate_auth_token(user_id):
     return s_obj.dumps({'user_id': user_id})
