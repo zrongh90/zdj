@@ -78,7 +78,7 @@ class WASServerModel(db.Model):
     server_id = Column(Integer, ForeignKey('__LinuxServer__.id'), nullable=False)
     was_name = Column(String(50), nullable=False)
     status = Column(Integer, nullable=False)
-    # port = Column(Integer, nullable=False)
+    port = Column(Integer, nullable=False)
     # status = Column(ChoiceType(STATUS_CHOICE))
 
     def __init__(self, server_id=None, status=0):
