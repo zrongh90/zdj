@@ -12,8 +12,9 @@ from flask_monitor.logger import logger
 from flask_monitor.utils import table_obj_2_dict
 from flask_monitor.conf import errors
 from flask_httpauth import HTTPTokenAuth
-from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
-from itsdangerous import SignatureExpired
+
+from itsdangerous import JSONWebSignatureSerializer as UnExpiredSerializer
+from itsdangerous import SignatureExpired, BadSignature
 from flask_monitor.database import db
 from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel, UserModel
 from flask_migrate import Migrate
@@ -29,8 +30,11 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 auth = HTTPTokenAuth()
-s_obj = Serializer(app.config['SECRET_KEY'], expires_in=6000)
-
+# 使用会超时的token
+# from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
+# s_obj = Serializer(app.config['SECRET_KEY'], expires_in=6000)
+# 使用不会超时的token
+s_obj = UnExpiredSerializer(app.config['SECRET_KEY'])
 
 
 
@@ -41,18 +45,28 @@ def generate_auth_token(user_id):
 @auth.verify_token
 def verify_token(token):
     in_user_id = None
+    if token is None or len(token) == 0:
+        return False
     try:
         in_user_id = s_obj.loads(token)['user_id']
     except SignatureExpired:
         # 如果密码获取，将认证失败
         return False
+    except BadSignature:
+        return False
     else:
         # 如果token未过期，则进行用户的认证
         # session = DB_session()
-        UserModel.query.filter_by(id=in_user_id).first()
-        # session.query(UserModel).filter(UserModel.id==in_user_id).get
-        print('get token and verify')
-        return True
+        match_user = UserModel.query.filter_by(id=in_user_id).first()
+        if match_user:
+            logger.info("user {0} match success!".format(match_user.id))
+            return True
+        else:
+            return False
+        # # session.query(UserModel).filter(UserModel.id==in_user_id).get
+        #
+        # print('get token and verify')
+        # return True
 
 
 class User(Resource):

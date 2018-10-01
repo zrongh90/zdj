@@ -13,8 +13,11 @@ def get_server_status(server_id):
     :return:
     """
     res = get(url='http://{0}:{1}/LinuxServer'.format(server_url, server_port),
-              data={'server_id': server_id}
-              )
+              data={'server_id': server_id},
+            headers = {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxfQ.qa6e1ZnQeUHZ360ulrg58KS1KZQe7GfTzUdMSoGF57I'}
+
+    )
     print(res.status_code)
     print(res.text)
 
@@ -51,5 +54,5 @@ def upload_server_status():
 
 if __name__ == '__main__':
     # post(url='http://127.0.0.1/LinuxServer', data={''})
-    # get_server_status(1)
-    upload_server_status()
+    get_server_status(1)
+    # upload_server_status()
