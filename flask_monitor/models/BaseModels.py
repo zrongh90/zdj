@@ -1,14 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, UniqueConstraint
-from flask_monitor.database import Base
+# from flask_monitor.database import Base
 from sqlalchemy_utils.types.choice import ChoiceType
 from datetime import datetime
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from flask_monitor.wsgi import app
 
-db = SQLAlchemy(app)
-# TODO: 通过flask migrate 控制数据库初始化/升级
-migrate = Migrate(app, db)
+from flask_monitor.database import db
+
 
 
 class UserModel(db.Model):

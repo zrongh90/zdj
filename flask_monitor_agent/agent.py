@@ -42,7 +42,7 @@ def upload_server_status():
                      'cpu_core_num': cpu_core_num,
                      'memory': memory},
                # 添加认证header，通过token进行认证
-               headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzNzYxNTc4NywiZXhwIjoxNTM3NjE2Mzg3fQ.eyJ1c2VyX2lkIjoxfQ.3Spm1jBYz8h996Mw7D9LB91dr95GiQf6tooSWCzeby4'}
+               headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsImlhdCI6MTUzODM2MzcxNSwiZXhwIjoxNTM4MzY5NzE1fQ.eyJ1c2VyX2lkIjoxfQ.ev2ghGRaWW-laiUB-vLNYQZkMfQgsz9cd4OtdUR2L1E'}
               )
     print(res.status_code)
     print(res.text)
