@@ -1,11 +1,9 @@
 # encoding: utf-8
 import hmac
 import hashlib
-from flask import Flask
-from flask_restful import Api, Resource, reqparse
-
-# from flask_monitor.database import DB_session
-from sqlalchemy import and_
+import json
+from flask import Flask, make_response
+from flask_restful import Api, Resource, reqparse, marshal_with, fields, abort
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from flask_monitor.logger import logger
@@ -24,7 +22,9 @@ app.config['SECRET_KEY'] = b'this is secure'
 # 使用mysql驱动连接mysql库
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:hujnhu123@192.168.113.1/test'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+# 通过自定义的errors指定出错时的返回信息，改掉默认的500错误的提醒，可以自定义提醒内容
 api = Api(app, catch_all_404s=True, errors=errors)
+
 db.init_app(app)
 # TODO: 通过flask migrate 控制数据库初始化/升级
 migrate = Migrate(app, db)
@@ -35,7 +35,6 @@ auth = HTTPTokenAuth()
 # s_obj = Serializer(app.config['SECRET_KEY'], expires_in=6000)
 # 使用不会超时的token
 s_obj = UnExpiredSerializer(app.config['SECRET_KEY'])
-
 
 
 def generate_auth_token(user_id):
@@ -50,29 +49,40 @@ def verify_token(token):
     try:
         in_user_id = s_obj.loads(token)['user_id']
     except SignatureExpired:
-        # 如果密码获取，将认证失败
+        # 如果token过期，将认证失败
         return False
     except BadSignature:
         return False
     else:
         # 如果token未过期，则进行用户的认证
-        # session = DB_session()
         match_user = UserModel.query.filter_by(id=in_user_id).first()
         if match_user:
             logger.info("user {0} match success!".format(match_user.id))
             return True
         else:
             return False
-        # # session.query(UserModel).filter(UserModel.id==in_user_id).get
-        #
-        # print('get token and verify')
-        # return True
 
 
 class User(Resource):
-    def get(self):
+    user_field = {
+        'user': fields.Nested({
+            'username': fields.String,
+            'email': fields.String
+        })
+    }
 
-        pass
+    @marshal_with(fields=user_field, envelope='user')
+    def get(self):
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, required=True, help='username is required.')
+        args = parser.parse_args()
+        match_user = UserModel.query.filter_by(username=args['username']).all()
+        if len(match_user) == 0:
+            abort(404, message='username {0} not found!'.format(args['username']))
+        elif len(match_user) == 1:
+            return {'user': match_user}
+        else:
+            abort('500', message='username {0} duplicate!'.format(args['username']))
 
     def post(self):
         parser = reqparse.RequestParser()
@@ -84,22 +94,43 @@ class User(Resource):
         match_users = UserModel.query.filter_by(name=args['username']).all()
         if len(match_users) == 1:
             match_user = match_users[0]
+            if match_user.password != password_hash:
+                abort(401, message='password error')
             token = generate_auth_token(match_user.id)
-            return {'token': token.decode('ascii')}, 200
+            res = make_response(json.dumps({'token': token.decode('ascii'), 'id': match_user.id}))
+            return res
         elif len(match_users) == 0:
-            new_user = UserModel(name=args['username'], password=password_hash, email=args['email'])
+            new_user = UserModel(username=args['username'], password=password_hash, email=args['email'])
             db.session.add(new_user)
             db.session.commit()
             token = generate_auth_token(new_user.id)
-            return {'token': token.decode('ascii')}, 200
+            res = make_response(json.dumps({'token': token.decode('ascii'), 'id': new_user.id}))
+            return res
         else:
-            return {'message': 'query user error'}, 404
+            abort(404, message='query user {0} error.'.format(args['username']))
+            # return {'message': 'query user error'}, 404
 
 
 class LinuxServer(Resource):
     # 使用http-auth进行登录认证
     decorators = [auth.login_required]
+    linux_field = {
+        'collect_time': fields.DateTime,
+        'server': fields.Nested({
+            'id': fields.Integer,
+            'ip_address': fields.String,
+            'cpu_core_num': fields.Integer,
+            'memory': fields.Float
+        }),
+        'server_status': fields.Nested({
+            'server_id': fields.Integer,
+            'cpu_percent': fields.Float,
+            'mem_percent': fields.Float,
 
+        })
+    }
+
+    @marshal_with(linux_field, envelope='linux_server')
     def get(self):
         """
         获取主机的信息
@@ -117,20 +148,15 @@ class LinuxServer(Resource):
             # 获取服务器的当前状态,以采集时间倒序
             server_status = ServerStatusModel.query.filter_by(server_id=match_server.id).\
                 order_by(ServerStatusModel.collect_time.desc()).first()
-            # server_status = session.query(ServerStatusModel).filter(
-            #     ServerStatusModel.server_id == match_server.id).order_by(ServerStatusModel.collect_time.desc()).first()
-            match_server_dict = table_obj_2_dict(match_server)  # 对结果对象转为dict
-            if server_status:
-                server_status_dict = table_obj_2_dict(server_status)  # 对结果对象转为dict
-                # 服务器status为从属状态
-                match_server_dict['status'] = server_status_dict
-            # session.close()
-            return {'server': match_server_dict}, 200
+            return {'collect_time': server_status.collect_time,
+                    'server': match_server,
+                    'server_status': server_status}
         else:
             #  没有匹配的LinuxServer结果或结果不为1
             logger.debug('match LinuxServer count is {0}.'.format(len(match_servers)))
             # session.close()
-            return {'server': None}, 404
+            # 通过flask_restful的abort函数进行返回
+            abort(404, message='linux server {0} not found.'.format(server_id))
 
     def post(self):
         """
@@ -171,9 +197,6 @@ class LinuxServer(Resource):
                                                 memory=in_memory)
             db.session.add(new_linux_server)
             db.session.commit()
-            # session.add(new_linux_server)
-            # session.flush()
-            # session.commit()
             return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 200
         elif len(match_servers) == 1:
             logger.debug('add collect data')
@@ -193,9 +216,6 @@ class LinuxServer(Resource):
             try:
                 db.session.add(new_collect)
                 db.session.commit()
-                # session.add(new_collect)
-                # session.flush()
-                # session.commit()
                 logger.debug('add collect data success! item {0}'.format(new_collect))
             except SQLAlchemyError as e:
                 logger.error(e)
@@ -223,5 +243,5 @@ api.add_resource(User, '/User')
 
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    app.run(port=8080)
 

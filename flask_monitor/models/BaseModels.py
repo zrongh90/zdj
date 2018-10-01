@@ -1,27 +1,24 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Float, DateTime, UniqueConstraint
-# from flask_monitor.database import Base
-from sqlalchemy_utils.types.choice import ChoiceType
 from datetime import datetime
-
 from flask_monitor.database import db
-
 
 
 class UserModel(db.Model):
     __tablename__ = '__UserModel__'
+    # TODO: 修改字段后migrate，原字段内容丢失
     __table_args__ = {'extend_existing': True}
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(50), unique=True)
+    username = Column(String(50), unique=True)
     email = Column(String(120), unique=True)
     password = Column(String(120), nullable=False)
 
-    def __init__(self, name=None, email=None, password=None):
-        self.name = name
+    def __init__(self, username=None, email=None, password=None):
+        self.username = username
         self.email = email
         self.password = password
 
     def __repr__(self):
-        return '<User %r>' % (self.name)
+        return '<User %r>'.format(self.username)
 
 
 class LinuxServerModel(db.Model):

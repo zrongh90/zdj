@@ -13,6 +13,7 @@ class UploadFileAPI(Resource):
     def post(self):
         parse = reqparse.RequestParser()
         # 此处应对应input里的name，通过append将upload的文件合并到一个参数内，遍历得到的文件
+        # If you want to accept multiple values for a key as a list
         # name="input-b6[]"
         parse.add_argument('input-b6[]', type=datastructures.FileStorage, location='files', action='append')
         args = parse.parse_args()
