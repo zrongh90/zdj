@@ -104,6 +104,7 @@ class User(Resource):
             db.session.add(new_user)
             db.session.commit()
             token = generate_auth_token(new_user.id)
+            # TODO: 此处应该返回201，表示资源已创建
             res = make_response(json.dumps({'token': token.decode('ascii'), 'id': new_user.id}))
             return res
         else:
@@ -197,7 +198,8 @@ class LinuxServer(Resource):
                                                 memory=in_memory)
             db.session.add(new_linux_server)
             db.session.commit()
-            return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 200
+            # TODO: 此处应该返回201，表示资源已创建
+            return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 201
         elif len(match_servers) == 1:
             logger.debug('add collect data')
             if args['collect_time'] is None:
