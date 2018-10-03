@@ -7,13 +7,13 @@ from flask_restful import Api, Resource, reqparse, marshal_with, fields, abort
 from datetime import datetime
 from sqlalchemy.exc import SQLAlchemyError
 from flask_monitor.logger import logger
-from flask_monitor.utils import table_obj_2_dict
 from flask_monitor.conf import errors
 from flask_httpauth import HTTPTokenAuth
 
 from itsdangerous import JSONWebSignatureSerializer as UnExpiredSerializer
 from itsdangerous import SignatureExpired, BadSignature
 from flask_monitor.database import db
+from flask_monitor.admin import admin
 from flask_monitor.models.BaseModels import LinuxServerModel, ServerStatusModel, UserModel
 from flask_migrate import Migrate
 
@@ -24,9 +24,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:hujnhu123@192.168.113.1/te
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 # 通过自定义的errors指定出错时的返回信息，改掉默认的500错误的提醒，可以自定义提醒内容
 api = Api(app, catch_all_404s=True, errors=errors)
-
+# 初始化DB，flask_alchemy
 db.init_app(app)
-# TODO: 通过flask migrate 控制数据库初始化/升级
+# 初始化ADMIN, flask_admin
+admin.init_app(app)
+# 通过flask migrate 控制数据库初始化/升级
 migrate = Migrate(app, db)
 
 auth = HTTPTokenAuth()
@@ -115,6 +117,7 @@ class User(Resource):
 class LinuxServer(Resource):
     # 使用http-auth进行登录认证
     decorators = [auth.login_required]
+    # 通过marshal定义封装的返回信息
     linux_field = {
         'collect_time': fields.DateTime,
         'server': fields.Nested({
