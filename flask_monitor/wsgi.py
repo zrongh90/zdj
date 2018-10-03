@@ -198,8 +198,10 @@ class LinuxServer(Resource):
                                                 memory=in_memory)
             db.session.add(new_linux_server)
             db.session.commit()
-            # TODO: 此处应该返回201，表示资源已创建
-            return {'id': new_linux_server.id, 'hostname': new_linux_server.hostname}, 201
+            res = make_response(
+                json.dumps({'id': new_linux_server.id, 'hostname': new_linux_server.hostname}),
+                201)
+            return res
         elif len(match_servers) == 1:
             logger.debug('add collect data')
             if args['collect_time'] is None:
@@ -223,7 +225,11 @@ class LinuxServer(Resource):
                 logger.error(e)
                 logger.error("unable to insert collect data to database.")
                 return {'collect_id': None}, 406
-            return {'server_id': match_server.id, 'collect_id': new_collect.id}, 200
+            res = make_response(
+                json.dumps({'server_id': match_server.id, 'collect_id': new_collect.id}),
+                201
+                )
+            return res
         else:
             print('match server error')
         # session.close()
