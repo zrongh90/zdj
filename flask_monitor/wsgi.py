@@ -177,6 +177,11 @@ class LinuxServer(Resource):
         parser.add_argument('ip_addr', type=str, required=True, help='ip address is required')
         parser.add_argument('cpu_percent', type=float)
         parser.add_argument('mem_percent', type=float)
+        # 如果在python2的parser中使用中文，需要使用six.text_type， 不过这是默认的。。。
+        # import six
+        # parser.add_argument('chinese', type=six.text_type)
+        import six
+        six.text_type
         parser.add_argument('collect_time', type=str)
         parser.add_argument('cpu_core_num', type=int)
         parser.add_argument('memory', type=float)
@@ -254,5 +259,5 @@ api.add_resource(User, '/User')
 
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    app.run(port=8081)
 
