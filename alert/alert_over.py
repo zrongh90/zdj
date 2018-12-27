@@ -1,7 +1,7 @@
 # encoding: utf-8
 import requests
-from .init_logger import alert_logger
-from .config import ALERT_OVER_RECEIVERS, ALERT_OVER_SOURCE, ALERT_OVER_URL
+from alert.init_logger import alert_logger
+from alert.config import ALERT_OVER_RECEIVERS, ALERT_OVER_SOURCE, ALERT_OVER_URL
 
 
 def alert_over(title, content):

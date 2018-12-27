@@ -2,7 +2,7 @@
 import re
 import json
 import requests
-
+from alert.init_logger import alert_logger
 
 def fetch_stock(stock_no):
     """
@@ -21,6 +21,8 @@ def fetch_stock(stock_no):
         price = api_result[stock_no]['price']
         percent = api_result[stock_no]['percent']
         return price, percent * 100
+    else:
+        alert_logger.error("调用网易接口错误，请检查！")
 
 
 if __name__ == '__main__':
