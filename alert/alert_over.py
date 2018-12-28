@@ -4,11 +4,12 @@ from alert.init_logger import alert_logger
 from alert.config import ALERT_OVER_RECEIVERS, ALERT_OVER_SOURCE, ALERT_OVER_URL
 
 
-def alert_over(title, content):
+def alert_over(title, content, url):
     """
     通过alert_over的接口去进行提醒
     :param title: 消息标题
     :param content: 消息正文
+    :param url: 消息链接地址
     :return:
     """
     alert_logger.debug("init alert over api to send message")
@@ -18,7 +19,8 @@ def alert_over(title, content):
                                 "source": ALERT_OVER_SOURCE,
                                 "receiver": ALERT_OVER_RECEIVERS,
                                 "title": title,
-                                "content": content
+                                "content": content,
+                                "url": url
                                 }
                             )
     alert_logger.debug(response_res)
